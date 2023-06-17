@@ -209,58 +209,73 @@ SamplePlayer::actionImpl() {
     }
 
     if (this->world().gameMode().type() == GameMode::PlayOn) {
-        if (this->world().self().goalie()) {
-
-
-            static const Rect2D our_penalty(Vector2D(-ServerParam::i().pitchHalfLength(),
-                                                     -ServerParam::i().penaltyAreaHalfWidth() + 1.0),
-                                            Size2D(ServerParam::i().penaltyAreaLength() - 1.0,
-                                                   ServerParam::i().penaltyAreaWidth() - 2.0));
-
-            //////////////////////////////////////////////////////////////
-            // catchable
-            if (this->world().time().cycle()
-                > this->world().self().catchTime().cycle() + ServerParam::i().catchBanCycle()
-                && this->world().ball().distFromSelf() < ServerParam::i().catchableArea() - 0.05
-                && our_penalty.contains(this->world().ball().pos())) {
-                this->doCatch();
-            } else if (this->world().self().isKickable()) {
-                Bhv_BasicOffensiveKick().execute(this);
+        if (!this->world().self().goalie()) {
+            AngleDeg angle = (this->world().ball().pos() - this->world().self().pos()).th() - this->world().self().body();
+            if (angle.degree() > 10 || angle.degree() < -10) {
+                this->doTurn(angle);
             } else {
-                Bhv_GoalieBasicMove().execute(this);
+                this->doDash(50);
             }
 
-        } else {
-            bool kickable = this->world().self().isKickable();
-            if (this->world().existKickableTeammate()
-                && this->world().teammatesFromBall().front()->distFromBall()
-                   < this->world().ball().distFromSelf()) {
-                kickable = false;
-            }
-
-            if (kickable) {
-                Bhv_BasicOffensiveKick().execute(this);
-            } else {
-                Bhv_BasicMove().execute(this);
+            if (this->world().self().isKickable()) {
+                this->doKick(100, 0);
             }
         }
-        return;
     }
 
-    //
-    // penalty kick mode
-    //
-    if (world().gameMode().isPenaltyKickMode()) {
-        dlog.addText(Logger::TEAM,
-                     __FILE__": penalty kick");
-        Bhv_PenaltyKick().execute(this);
-        return;
-    }
+    // if (this->world().gameMode().type() == GameMode::PlayOn) {
+    //     if (this->world().self().goalie()) {
 
-    //
-    // other set play mode
-    //
-    Bhv_SetPlay().execute(this);
+
+    //         static const Rect2D our_penalty(Vector2D(-ServerParam::i().pitchHalfLength(),
+    //                                                  -ServerParam::i().penaltyAreaHalfWidth() + 1.0),
+    //                                         Size2D(ServerParam::i().penaltyAreaLength() - 1.0,
+    //                                                ServerParam::i().penaltyAreaWidth() - 2.0));
+
+    //         //////////////////////////////////////////////////////////////
+    //         // catchable
+    //         if (this->world().time().cycle()
+    //             > this->world().self().catchTime().cycle() + ServerParam::i().catchBanCycle()
+    //             && this->world().ball().distFromSelf() < ServerParam::i().catchableArea() - 0.05
+    //             && our_penalty.contains(this->world().ball().pos())) {
+    //             this->doCatch();
+    //         } else if (this->world().self().isKickable()) {
+    //             Bhv_BasicOffensiveKick().execute(this);
+    //         } else {
+    //             Bhv_GoalieBasicMove().execute(this);
+    //         }
+
+    //     } else {
+    //         bool kickable = this->world().self().isKickable();
+    //         if (this->world().existKickableTeammate()
+    //             && this->world().teammatesFromBall().front()->distFromBall()
+    //                < this->world().ball().distFromSelf()) {
+    //             kickable = false;
+    //         }
+
+    //         if (kickable) {
+    //             Bhv_BasicOffensiveKick().execute(this);
+    //         } else {
+    //             Bhv_BasicMove().execute(this);
+    //         }
+    //     }
+    //     return;
+    // }
+
+    // //
+    // // penalty kick mode
+    // //
+    // if (world().gameMode().isPenaltyKickMode()) {
+    //     dlog.addText(Logger::TEAM,
+    //                  __FILE__": penalty kick");
+    //     Bhv_PenaltyKick().execute(this);
+    //     return;
+    // }
+
+    // //
+    // // other set play mode
+    // //
+    // Bhv_SetPlay().execute(this);
 }
 
 /*-------------------------------------------------------------------*/
@@ -408,13 +423,13 @@ SamplePlayer::doPreprocess() {
     //
     // freezed by tackle effect
     //
-    if (wm.self().isFrozen()) {
-        dlog.addText(Logger::TEAM,
-                     __FILE__": tackle wait. expires= %d",
-                     wm.self().tackleExpires());
-        // face neck to ball
-        return true;
-    }
+    // if (wm.self().isFrozen()) {
+    //     dlog.addText(Logger::TEAM,
+    //                  __FILE__": tackle wait. expires= %d",
+    //                  wm.self().tackleExpires());
+    //     // face neck to ball
+    //     return true;
+    // }
 
     //
     // BeforeKickOff or AfterGoal. jump to the initial position
@@ -443,50 +458,50 @@ SamplePlayer::doPreprocess() {
     //
     // self localization error
     //
-    if (!wm.self().posValid()) {
-        dlog.addText(Logger::TEAM,
-                     __FILE__": invalid my pos");
-        Bhv_Emergency().execute(this); // includes change view
-        return true;
-    }
+    // if (!wm.self().posValid()) {
+    //     dlog.addText(Logger::TEAM,
+    //                  __FILE__": invalid my pos");
+    //     Bhv_Emergency().execute(this); // includes change view
+    //     return true;
+    // }
 
-    //
-    // ball localization error
-    //
-    const int count_thr = (wm.self().goalie()
-                           ? 10
-                           : 5);
-    if (wm.ball().posCount() > count_thr
-        || (wm.gameMode().type() != GameMode::PlayOn
-            && wm.ball().seenPosCount() > count_thr + 10)) {
-        dlog.addText(Logger::TEAM,
-                     __FILE__": search ball");
-        Bhv_NeckBodyToBall().execute(this);
-        return true;
-    }
+    // //
+    // // ball localization error
+    // //
+    // const int count_thr = (wm.self().goalie()
+    //                        ? 10
+    //                        : 5);
+    // if (wm.ball().posCount() > count_thr
+    //     || (wm.gameMode().type() != GameMode::PlayOn
+    //         && wm.ball().seenPosCount() > count_thr + 10)) {
+    //     dlog.addText(Logger::TEAM,
+    //                  __FILE__": search ball");
+    //     Bhv_NeckBodyToBall().execute(this);
+    //     return true;
+    // }
 
-    //
-    // check queued action
-    //
-    if (this->doIntention()) {
-        dlog.addText(Logger::TEAM,
-                     __FILE__": do queued intention");
-        return true;
-    }
+    // //
+    // // check queued action
+    // //
+    // if (this->doIntention()) {
+    //     dlog.addText(Logger::TEAM,
+    //                  __FILE__": do queued intention");
+    //     return true;
+    // }
 
-    //
-    // check simultaneous kick
-    //
-    if (doForceKick()) {
-        return true;
-    }
+    // //
+    // // check simultaneous kick
+    // //
+    // if (doForceKick()) {
+    //     return true;
+    // }
 
-    //
-    // check pass message
-    //
-    if (doHeardPassReceive()) {
-        return true;
-    }
+    // //
+    // // check pass message
+    // //
+    // if (doHeardPassReceive()) {
+    //     return true;
+    // }
 
     return false;
 }
