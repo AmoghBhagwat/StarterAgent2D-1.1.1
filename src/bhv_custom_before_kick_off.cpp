@@ -51,47 +51,38 @@ using namespace rcsc;
 
 */
 bool
-Bhv_CustomBeforeKickOff::execute( PlayerAgent * agent )
-{
-    const ServerParam & SP = ServerParam::i();
-    const WorldModel & wm = agent->world();
+Bhv_CustomBeforeKickOff::execute(PlayerAgent *agent) {
+    const ServerParam &SP = ServerParam::i();
+    const WorldModel &wm = agent->world();
 
-    if ( wm.time().cycle() == 0
-         && wm.time().stopped() < 5 )
-    {
-        agent->doTurn( 0.0 );
+    if (wm.time().cycle() == 0
+        && wm.time().stopped() < 5) {
+        agent->doTurn(0.0);
         return false;
     }
 
-    if ( wm.gameMode().type() == GameMode::AfterGoal_
-         && wm.self().vel().r() > 0.05 )
-    {
-        agent->doTurn( 180.0 );
+    if (wm.gameMode().type() == GameMode::AfterGoal_
+        && wm.self().vel().r() > 0.05) {
+        agent->doTurn(180.0);
         return true;
     }
 
     // check center circle
     SideID kickoff_side = NEUTRAL;
 
-    if ( wm.gameMode().type() == GameMode::AfterGoal_ )
-    {
+    if (wm.gameMode().type() == GameMode::AfterGoal_) {
         // after our goal
-        if ( wm.gameMode().side() != wm.ourSide() )
-        {
+        if (wm.gameMode().side() != wm.ourSide()) {
             kickoff_side = wm.ourSide();
+        } else {
+            kickoff_side = (wm.ourSide() == LEFT
+                            ? RIGHT
+                            : LEFT);
         }
-        else
-        {
-            kickoff_side = ( wm.ourSide() == LEFT
-                             ? RIGHT
-                             : LEFT );
-        }
-    }
-    else // before_kick_off
+    } else // before_kick_off
     {
         // check half_time count
-        if ( SP.halfTime() > 0 )
-        {
+        if (SP.halfTime() > 0) {
             int half_time = SP.halfTime() * 10;
             int extra_half_time = SP.extraHalfTime() * 10;
             int normal_time = half_time * SP.nrNormalHalfs();
@@ -111,9 +102,8 @@ Bhv_CustomBeforeKickOff::execute( PlayerAgent * agent )
 #endif
             int time_flag = 0;
 
-            if ( wm.time().cycle() <= normal_time )
-            {
-                time_flag = ( wm.time().cycle() / half_time ) % 2;
+            if (wm.time().cycle() <= normal_time) {
+                time_flag = (wm.time().cycle() / half_time) % 2;
 #ifdef DEBUG_PRINT
                 dlog.addText( Logger::ACTION,
                               __FILE__": time=%d time/half_time=%d flag=%d",
@@ -121,11 +111,9 @@ Bhv_CustomBeforeKickOff::execute( PlayerAgent * agent )
                               wm.time().cycle() / half_time,
                               time_flag );
 #endif
-            }
-            else if ( wm.time().cycle() <= normal_time + extra_time )
-            {
+            } else if (wm.time().cycle() <= normal_time + extra_time) {
                 int overtime = wm.time().cycle() - normal_time;
-                time_flag = ( overtime / extra_half_time ) % 2;
+                time_flag = (overtime / extra_half_time) % 2;
 #ifdef DEBUG_PRINT
                 dlog.addText( Logger::ACTION,
                               __FILE__": overtime=%d overttime/extra_half_time=%d flag=%d",
@@ -135,12 +123,10 @@ Bhv_CustomBeforeKickOff::execute( PlayerAgent * agent )
 #endif
             }
 
-            kickoff_side = ( time_flag == 0
-                             ? LEFT
-                             : RIGHT );
-        }
-        else
-        {
+            kickoff_side = (time_flag == 0
+                            ? LEFT
+                            : RIGHT);
+        } else {
             kickoff_side = LEFT;
         }
     }
@@ -153,9 +139,8 @@ Bhv_CustomBeforeKickOff::execute( PlayerAgent * agent )
                   __FILE__": move_pos=(%.2f %.2f)",
                   M_move_point.x, M_move_point.y );
 #endif
-    if ( SP.kickoffOffside()
-         && M_move_point.x >= 0.0 )
-    {
+    if (SP.kickoffOffside()
+        && M_move_point.x >= 0.0) {
         M_move_point.x = -0.001;
 #ifdef DEBUG_PRINT
         dlog.addText( Logger::ACTION,
@@ -163,10 +148,9 @@ Bhv_CustomBeforeKickOff::execute( PlayerAgent * agent )
 #endif
     }
 
-    if ( kickoff_side != wm.ourSide()
-         && M_move_point.r() < ServerParam::i().centerCircleR() + 0.1 )
-    {
-        M_move_point *= ( ServerParam::i().centerCircleR() + 0.5 ) / M_move_point.r();
+    if (kickoff_side != wm.ourSide()
+        && M_move_point.r() < ServerParam::i().centerCircleR() + 0.1) {
+        M_move_point *= (ServerParam::i().centerCircleR() + 0.5) / M_move_point.r();
 #ifdef DEBUG_PRINT
         dlog.addText( Logger::ACTION,
                       __FILE__": avoid center circle. new pos=(%.2f %.2f)",
@@ -175,13 +159,12 @@ Bhv_CustomBeforeKickOff::execute( PlayerAgent * agent )
     }
 
     // move
-    double tmpr = ( M_move_point - wm.self().pos() ).r();
-    if ( tmpr > 1.0 )
-    {
-        agent->doMove( M_move_point.x, M_move_point.y );
+    double tmpr = (M_move_point - wm.self().pos()).r();
+    if (tmpr > 1.0) {
+        agent->doMove(M_move_point.x, M_move_point.y);
         return true;
     }
 
     // field scan
-    return Bhv_ScanField().execute( agent );
+    return Bhv_ScanField().execute(agent);
 }

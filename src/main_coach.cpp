@@ -40,44 +40,41 @@
 
 namespace {
 
-SampleCoach agent;
+    SampleCoach agent;
 
 /*-------------------------------------------------------------------*/
-void
-sigExitHandle( int )
-{
-    std::cerr << "Killed. Exiting..." << std::endl;
-    agent.finalize();
-    std::exit( EXIT_FAILURE );
-}
+    void
+    sigExitHandle(int) {
+        std::cerr << "Killed. Exiting..." << std::endl;
+        agent.finalize();
+        std::exit(EXIT_FAILURE);
+    }
 
 };
 
 
 /*-------------------------------------------------------------------*/
 int
-main( int argc, char **argv )
-{
-    struct sigaction sig_action ;
-    sig_action.sa_handler = &sigExitHandle ;
+main(int argc, char **argv) {
+    struct sigaction sig_action;
+    sig_action.sa_handler = &sigExitHandle;
     sig_action.sa_flags = 0;
-    if ( sigaction( SIGINT, &sig_action , NULL ) != 0
-         || sigaction( SIGTERM, &sig_action , NULL ) != 0
-         || sigaction( SIGHUP, &sig_action , NULL ) != 0 )
+    if (sigaction(SIGINT, &sig_action, NULL) != 0
+        || sigaction(SIGTERM, &sig_action, NULL) != 0
+        || sigaction(SIGHUP, &sig_action, NULL) != 0)
         /*if ( signal(SIGINT, &sigExitHandle) == SIG_ERR
           || signal(SIGTERM, &sigExitHandle) == SIG_ERR
           || signal(SIGHUP, &sigExitHandle) == SIG_ERR )*/
     {
         std::cerr << __FILE__ << ": " << __LINE__
                   << ": could not set signal handler: "
-                  << std::strerror( errno ) << std::endl;
-        std::exit( EXIT_FAILURE );
+                  << std::strerror(errno) << std::endl;
+        std::exit(EXIT_FAILURE);
     }
 
     rcsc::BasicClient client;
 
-    if ( ! agent.init( &client, argc, argv ) )
-    {
+    if (!agent.init(&client, argc, argv)) {
         return EXIT_FAILURE;
     }
 
@@ -102,7 +99,7 @@ main( int argc, char **argv )
               << "*****************************************************************\n"
               << std::flush;
 
-    client.run( &agent );
+    client.run(&agent);
 
     return EXIT_SUCCESS;
 }

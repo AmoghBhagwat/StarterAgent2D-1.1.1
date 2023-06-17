@@ -48,8 +48,7 @@ using namespace rcsc;
 
  */
 SampleTrainer::SampleTrainer()
-    : TrainerAgent()
-{
+        : TrainerAgent() {
 
 }
 
@@ -57,8 +56,7 @@ SampleTrainer::SampleTrainer()
 /*!
 
  */
-SampleTrainer::~SampleTrainer()
-{
+SampleTrainer::~SampleTrainer() {
 
 }
 
@@ -67,9 +65,8 @@ SampleTrainer::~SampleTrainer()
 
  */
 bool
-SampleTrainer::initImpl( CmdLineParser & cmd_parser )
-{
-    bool result = TrainerAgent::initImpl( cmd_parser );
+SampleTrainer::initImpl(CmdLineParser &cmd_parser) {
+    bool result = TrainerAgent::initImpl(cmd_parser);
 
 #if 0
     ParamMap my_params;
@@ -82,15 +79,13 @@ SampleTrainer::initImpl( CmdLineParser & cmd_parser )
     cmd_parser.parse( my_params );
 #endif
 
-    if ( cmd_parser.failed() )
-    {
+    if (cmd_parser.failed()) {
         std::cerr << "coach: ***WARNING*** detected unsupported options: ";
-        cmd_parser.print( std::cerr );
+        cmd_parser.print(std::cerr);
         std::cerr << std::endl;
     }
 
-    if ( ! result )
-    {
+    if (!result) {
         return false;
     }
 
@@ -106,10 +101,8 @@ SampleTrainer::initImpl( CmdLineParser & cmd_parser )
 
  */
 void
-SampleTrainer::actionImpl()
-{
-    if ( world().teamNameLeft().empty() )
-    {
+SampleTrainer::actionImpl() {
+    if (world().teamNameLeft().empty()) {
         doTeamNames();
         return;
     }
@@ -128,8 +121,7 @@ SampleTrainer::actionImpl()
 
  */
 void
-SampleTrainer::sampleAction()
-{
+SampleTrainer::sampleAction() {
     // sample training to test a ball interception.
 
     static int s_state = 0;
@@ -137,71 +129,69 @@ SampleTrainer::sampleAction()
 
     static Vector2D s_last_player_move_pos;
 
-    if ( world().existKickablePlayer() )
-    {
+    if (world().existKickablePlayer()) {
         s_state = 1;
     }
 
-    switch ( s_state ) {
-    case 0:
-        // nothing to do
-        break;
-    case 1:
-        // exist kickable left player
+    switch (s_state) {
+        case 0:
+            // nothing to do
+            break;
+        case 1:
+            // exist kickable left player
 
-        // recover stamina
-        doRecover();
-        // move ball to center
-        doMoveBall( Vector2D( 0.0, 0.0 ),
-                    Vector2D( 0.0, 0.0 ) );
-        // change playmode to play_on
-        doChangeMode( PM_PlayOn );
-        {
-            // move player to random point
-            UniformReal uni01( 0.0, 1.0 );
-            Vector2D move_pos
-                = Vector2D::polar2vector( 15.0, //20.0,
-                                          AngleDeg( 360.0 * uni01() ) );
-            s_last_player_move_pos = move_pos;
+            // recover stamina
+            doRecover();
+            // move ball to center
+            doMoveBall(Vector2D(0.0, 0.0),
+                       Vector2D(0.0, 0.0));
+            // change playmode to play_on
+            doChangeMode(PM_PlayOn);
+            {
+                // move player to random point
+                UniformReal uni01(0.0, 1.0);
+                Vector2D move_pos
+                        = Vector2D::polar2vector(15.0, //20.0,
+                                                 AngleDeg(360.0 * uni01()));
+                s_last_player_move_pos = move_pos;
 
-            doMovePlayer( config().teamName(),
-                          1, // uniform number
-                          move_pos,
-                          move_pos.th() - 180.0 );
-        }
-        // change player type
-        {
-            static int type = 0;
-            doChangePlayerType( world().teamNameLeft(), 1, type );
-            type = ( type + 1 ) % PlayerParam::i().playerTypes();
-        }
+                doMovePlayer(config().teamName(),
+                             1, // uniform number
+                             move_pos,
+                             move_pos.th() - 180.0);
+            }
+            // change player type
+            {
+                static int type = 0;
+                doChangePlayerType(world().teamNameLeft(), 1, type);
+                type = (type + 1) % PlayerParam::i().playerTypes();
+            }
 
-        doSay( "move player" );
-        s_state = 2;
-        std::cout << "trainer: actionImpl init episode." << std::endl;
-        break;
-    case 2:
-        ++s_wait_counter;
-        if ( s_wait_counter > 3
-             && ! world().playersLeft().empty() )
-        {
-            // add velocity to the ball
-            //UniformReal uni_spd( 2.7, 3.0 );
-            //UniformReal uni_spd( 2.5, 3.0 );
-            UniformReal uni_spd( 2.3, 2.7 );
-            //UniformReal uni_ang( -50.0, 50.0 );
-            UniformReal uni_ang( -10.0, 10.0 );
-            Vector2D velocity
-                = Vector2D::polar2vector( uni_spd(),
-                                          s_last_player_move_pos.th()
-                                          + uni_ang() );
-            doMoveBall( Vector2D( 0.0, 0.0 ),
-                        velocity );
-            s_state = 0;
-            s_wait_counter = 0;
-            std::cout << "trainer: actionImpl start ball" << std::endl;
-        }
-        break;
+            doSay("move player");
+            s_state = 2;
+            std::cout << "trainer: actionImpl init episode." << std::endl;
+            break;
+        case 2:
+            ++s_wait_counter;
+            if (s_wait_counter > 3
+                && !world().playersLeft().empty()) {
+                // add velocity to the ball
+                //UniformReal uni_spd( 2.7, 3.0 );
+                //UniformReal uni_spd( 2.5, 3.0 );
+                UniformReal uni_spd(2.3, 2.7);
+                //UniformReal uni_ang( -50.0, 50.0 );
+                UniformReal uni_ang(-10.0, 10.0);
+                Vector2D velocity
+                        = Vector2D::polar2vector(uni_spd(),
+                                                 s_last_player_move_pos.th()
+                                                 + uni_ang());
+                doMoveBall(Vector2D(0.0, 0.0),
+                           velocity);
+                s_state = 0;
+                s_wait_counter = 0;
+                std::cout << "trainer: actionImpl start ball" << std::endl;
+            }
+            break;
 
     }
 }
@@ -211,16 +201,13 @@ SampleTrainer::sampleAction()
 
  */
 void
-SampleTrainer::recoverForever()
-{
-    if ( world().playersLeft().empty() )
-    {
+SampleTrainer::recoverForever() {
+    if (world().playersLeft().empty()) {
         return;
     }
 
-    if ( world().time().stopped() == 0
-         && world().time().cycle() % 50 == 0 )
-    {
+    if (world().time().stopped() == 0
+        && world().time().cycle() % 50 == 0) {
         // recover stamina
         doRecover();
     }
@@ -231,35 +218,31 @@ SampleTrainer::recoverForever()
 
  */
 void
-SampleTrainer::doSubstitute()
-{
+SampleTrainer::doSubstitute() {
     static bool s_substitute = false;
-    if ( ! s_substitute
-         && world().time().cycle() == 0
-         && world().time().stopped() >= 10 )
-    {
+    if (!s_substitute
+        && world().time().cycle() == 0
+        && world().time().stopped() >= 10) {
         std::cerr << "trainer " << world().time() << " team name = "
                   << world().teamNameLeft()
                   << std::endl;
 
-        if ( ! world().teamNameLeft().empty() )
-        {
-            UniformSmallInt uni( 0, PlayerParam::i().ptMax() );
-            doChangePlayerType( world().teamNameLeft(),
-                                1,
-                                uni() );
+        if (!world().teamNameLeft().empty()) {
+            UniformSmallInt uni(0, PlayerParam::i().ptMax());
+            doChangePlayerType(world().teamNameLeft(),
+                               1,
+                               uni());
 
             s_substitute = true;
         }
     }
 
-    if ( world().time().stopped() == 0
-         && world().time().cycle() % 100 == 1
-         && ! world().teamNameLeft().empty() )
-    {
+    if (world().time().stopped() == 0
+        && world().time().cycle() % 100 == 1
+        && !world().teamNameLeft().empty()) {
         static int type = 0;
-        doChangePlayerType( world().teamNameLeft(), 1, type );
-        type = ( type + 1 ) % PlayerParam::i().playerTypes();
+        doChangePlayerType(world().teamNameLeft(), 1, type);
+        type = (type + 1) % PlayerParam::i().playerTypes();
     }
 }
 
@@ -268,10 +251,8 @@ SampleTrainer::doSubstitute()
 
  */
 void
-SampleTrainer::doKeepaway()
-{
-    if ( world().trainingTime() == world().time() )
-    {
+SampleTrainer::doKeepaway() {
+    if (world().trainingTime() == world().time()) {
         std::cerr << "trainer: "
                   << world().time()
                   << " keepaway training time." << std::endl;

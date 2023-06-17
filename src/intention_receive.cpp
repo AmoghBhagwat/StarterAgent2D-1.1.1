@@ -48,17 +48,13 @@ using namespace rcsc;
 /*!
 
  */
-IntentionReceive::IntentionReceive( const Vector2D & target_point,
-                                    const double & dash_power,
-                                    const double & buf,
-                                    const int max_step,
-                                    const GameTime & start_time )
-    : M_target_point( target_point )
-    , M_dash_power( dash_power )
-    , M_buffer( buf )
-    , M_step( max_step )
-    , M_last_execute_time( start_time )
-{
+IntentionReceive::IntentionReceive(const Vector2D &target_point,
+                                   const double &dash_power,
+                                   const double &buf,
+                                   const int max_step,
+                                   const GameTime &start_time)
+        : M_target_point(target_point), M_dash_power(dash_power), M_buffer(buf), M_step(max_step),
+          M_last_execute_time(start_time) {
 
 }
 
@@ -67,47 +63,40 @@ IntentionReceive::IntentionReceive( const Vector2D & target_point,
 
  */
 bool
-IntentionReceive::finished( const PlayerAgent * agent )
-{
-    if ( M_step <= 0 )
-    {
-        dlog.addText( Logger::TEAM,
-                      __FILE__": finished. time 0" );
+IntentionReceive::finished(const PlayerAgent *agent) {
+    if (M_step <= 0) {
+        dlog.addText(Logger::TEAM,
+                     __FILE__": finished. time 0");
         return true;
     }
 
-    if ( agent->world().self().isKickable() )
-    {
-        dlog.addText( Logger::TEAM,
-                      __FILE__": already kickable" );
+    if (agent->world().self().isKickable()) {
+        dlog.addText(Logger::TEAM,
+                     __FILE__": already kickable");
         return true;
     }
 
-    if ( agent->world().existKickableTeammate() )
-    {
-        dlog.addText( Logger::TEAM,
-                      __FILE__": exist kickable teammate" );
+    if (agent->world().existKickableTeammate()) {
+        dlog.addText(Logger::TEAM,
+                     __FILE__": exist kickable teammate");
         return true;
     }
 
-    if ( agent->world().ball().distFromSelf() < 3.0 )
-    {
-        dlog.addText( Logger::TEAM,
-                      __FILE__": finished. ball very near" );
+    if (agent->world().ball().distFromSelf() < 3.0) {
+        dlog.addText(Logger::TEAM,
+                     __FILE__": finished. ball very near");
         return true;
     }
 
-    if ( M_last_execute_time.cycle() < agent->world().time().cycle() - 1 )
-    {
-        dlog.addText( Logger::TEAM,
-                      __FILE__": finished. strange time." );
+    if (M_last_execute_time.cycle() < agent->world().time().cycle() - 1) {
+        dlog.addText(Logger::TEAM,
+                     __FILE__": finished. strange time.");
         return true;
     }
 
-    if ( agent->world().self().pos().dist( M_target_point ) < M_buffer )
-    {
-        dlog.addText( Logger::TEAM,
-                      __FILE__": finished. already there." );
+    if (agent->world().self().pos().dist(M_target_point) < M_buffer) {
+        dlog.addText(Logger::TEAM,
+                     __FILE__": finished. already there.");
         return true;
     }
 
@@ -119,59 +108,55 @@ IntentionReceive::finished( const PlayerAgent * agent )
 
  */
 bool
-IntentionReceive::execute( PlayerAgent * agent )
-{
-    if ( M_step <= 0 )
-    {
-        dlog.addText( Logger::TEAM,
-                      __FILE__": execute. empty intention." );
+IntentionReceive::execute(PlayerAgent *agent) {
+    if (M_step <= 0) {
+        dlog.addText(Logger::TEAM,
+                     __FILE__": execute. empty intention.");
         return false;
     }
 
-    const WorldModel & wm = agent->world();
+    const WorldModel &wm = agent->world();
 
     M_step -= 1;
     M_last_execute_time = wm.time();
 
-    agent->debugClient().setTarget( M_target_point );
-    agent->debugClient().addMessage( "IntentionRecv" );
+    agent->debugClient().setTarget(M_target_point);
+    agent->debugClient().addMessage("IntentionRecv");
 
-    dlog.addText( Logger::TEAM,
-                  __FILE__": execute. try to receive" );
+    dlog.addText(Logger::TEAM,
+                 __FILE__": execute. try to receive");
 
     int self_min = wm.interceptTable()->selfReachCycle();
 
-    if ( self_min < 6 )
-    {
-        dlog.addText( Logger::TEAM,
-                      __FILE__": execute. point very near. intercept" );
-        agent->debugClient().addMessage( "IntentionRecv:Intercept" );
-        Body_Intercept().execute( agent );
+    if (self_min < 6) {
+        dlog.addText(Logger::TEAM,
+                     __FILE__": execute. point very near. intercept");
+        agent->debugClient().addMessage("IntentionRecv:Intercept");
+        Body_Intercept().execute(agent);
 
         return true;
     }
 
-    if ( Body_Intercept().execute( agent ) )
-    {
-        dlog.addText( Logger::TEAM,
-                      __FILE__": execute. intercept cycle=%d",
-                      self_min );
-        agent->debugClient().addMessage( "IntentionRecv%d:Intercept", M_step );
+    if (Body_Intercept().execute(agent)) {
+        dlog.addText(Logger::TEAM,
+                     __FILE__": execute. intercept cycle=%d",
+                     self_min);
+        agent->debugClient().addMessage("IntentionRecv%d:Intercept", M_step);
         return true;
     }
 
 
-    dlog.addText( Logger::TEAM,
-                  __FILE__": execute. intercept cycle=%d. go to receive point",
-                  self_min );
-    agent->debugClient().addMessage( "IntentionRecv%d:GoTo", M_step );
-    agent->debugClient().setTarget( M_target_point );
-    agent->debugClient().addCircle( M_target_point, M_buffer );
+    dlog.addText(Logger::TEAM,
+                 __FILE__": execute. intercept cycle=%d. go to receive point",
+                 self_min);
+    agent->debugClient().addMessage("IntentionRecv%d:GoTo", M_step);
+    agent->debugClient().setTarget(M_target_point);
+    agent->debugClient().addCircle(M_target_point, M_buffer);
 
-    Body_GoToPoint( M_target_point,
-                    M_buffer,
-                    M_dash_power
-                    ).execute( agent );
+    Body_GoToPoint(M_target_point,
+                   M_buffer,
+                   M_dash_power
+    ).execute(agent);
 
     return true;
 }
