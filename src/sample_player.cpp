@@ -74,10 +74,13 @@
 #include <rcsc/param/param_map.h>
 #include <rcsc/param/cmd_line_parser.h>
 
+#include <rcsc/types.h>
+
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <cstdlib>
+#include <random>
 
 using namespace rcsc;
 
@@ -85,6 +88,11 @@ using namespace rcsc;
 /*!
 
  */
+
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_int_distribution<> dist(-70, 70);
+
 SamplePlayer::SamplePlayer()
         : PlayerAgent(),
           M_communication() {
@@ -209,73 +217,127 @@ SamplePlayer::actionImpl() {
     }
 
     if (this->world().gameMode().type() == GameMode::PlayOn) {
-        if (!this->world().self().goalie()) {
-            AngleDeg angle = (this->world().ball().pos() - this->world().self().pos()).th() - this->world().self().body();
-            if (angle.degree() > 10 || angle.degree() < -10) {
-                this->doTurn(angle);
-            } else {
-                this->doDash(50);
-            }
+        std::string message = "TEST";
+        
 
-            if (this->world().self().isKickable()) {
-                this->doKick(100, 0);
-            }
+    //     double speed = 3;
+    //     int goal_marker_id = MarkerID::Goal_R;
+    //     if (this->world().self().side() == SideID::RIGHT) {
+    //         speed = 5;
+    //         goal_marker_id = MarkerID::Goal_L;
+    //     }
+
+    //     VisualSensor::MarkerCont markers = this->visualSensor().markers();
+    //     VisualSensor::BallCont balls = this->visualSensor().balls();
+    //     VisualSensor::PlayerCont teammates = this->visualSensor().teammates();
+    //     VisualSensor::PlayerCont opponents = this->visualSensor().opponents();
+    //     VisualSensor::PlayerCont unknown_opponents = this->visualSensor().unknownOpponents();
+
+        if (this->world().self().goalie()) {
+    //         if (balls.size() != 0) {
+    //             VisualSensor::BallT ball = balls[0];
+                
+    //             bool ok = true;
+    //             for (VisualSensor::MarkerT marker : markers) {
+    //                 if (marker.id_ == MarkerID::Flag_C || marker.id_ == MarkerID::Flag_CT || marker.id_ == MarkerID::Flag_CB) {
+    //                     if (marker.dist_ < 47) {
+    //                         ok = false;
+    //                         break;
+    //                     }
+    //                 }
+    //             }
+
+    //             if (ok && ball.dist_ < 1) {
+    //                 this->doCatch();
+    //                 return;
+    //             }
+
+    //             if (ball.dist_ < 10) ok=true;                
+
+    //             if (ball.dir_ > 45 || ball.dir_ < -45) {
+    //                 this->doTurn(5);
+    //                 return;
+    //             }
+
+    //             if (ok) {
+
+    //                 this->doDash(4*ball.dist_ + 30, ball.dir_);
+    //             }
+    //         } else {
+    //             this->doTurn(30);
+    //         }
+        } else {
+    //         double goal_direction = 180;
+    //         for (VisualSensor::MarkerT marker : markers) {
+    //             if (marker.id_ == goal_marker_id) {
+    //                 goal_direction = marker.dir_;
+    //             } else if (marker.id_ == MarkerID::Flag_C || marker.id_ == MarkerID::Flag_PLT || marker.id_ == MarkerID::Flag_PLB || marker.id_ == MarkerID::Flag_PLC || marker.id_ == MarkerID::Flag_PRB || marker.id_ == MarkerID::Flag_PRC || marker.id_ == MarkerID::Flag_PRT) {
+
+    //             } else if (marker.dist_ < 2) {
+    //                 std::cout << "CUSTOM: marker id = " << marker.id_ << std::endl;
+    //                 this->doTurn(90);
+    //                 return;
+    //             }
+    //         }
+
+    //         if (balls.size() == 0) {
+    //             this->doTurn(5);
+    //             return;
+    //         }
+
+    //         VisualSensor::BallT ball = balls[0];
+    //         double dir = ball.dir_;
+    //         double dist = ball.dist_;
+
+    //         if (dir > 30 || dir < -30) {
+    //             this->doTurn(10);
+    //             return;
+    //         }
+
+    //         if (dist < 1) {
+    //             if (opponents.size() > 0 && teammates.size() > 0) {
+    //                 VisualSensor::PlayerT closestTeammate = teammates.front();
+    //                 this->doKick(70, closestTeammate.dir_);
+    //                 return;
+    //             }
+    //             this->doKick(50, goal_direction);
+    //             return;
+    //         }
+
+    //         this->doDash(speed*dist + 10, 0);
+
+            // AngleDeg angle = (this->world().ball().pos() - this->world().self().pos()).th() - this->world().self().body();
+            // if (angle.degree() > 10 || angle.degree() < -10) {
+            //     this->doTurn(angle);
+            // } else {
+            //     this->doDash(50);
+            // }
+            
+
+            // if (this->world().self().isKickable()) {
+            //     Vector2D target = Vector2D(54.0, 0);
+            
+            //     std::cout << "opponents seen by " << this->world().self().unum() << " = " << this->world().opponents().size() << std::endl;
+            //     // std::cout << "point count = " << this->world().getPointCount() << std::endl;
+
+            //     const rcsc::PlayerObject* nearest = this->world().getOpponentNearestToSelf(10, true);
+            //     if (nearest != NULL) {
+            //         double distance = nearest->distFromSelf();
+            //         std::cout << "nearest distance = " << distance << std::endl;
+            //         if (distance < 10) {
+            //             target = nearest->pos();
+            //             target = target.add(10, 10);
+            //             std::cout << "kicking away from opponent" << std::endl;
+            //         }
+            //     }
+            //     rcsc::AbstractPlayerCont list = this->world().allPlayers();
+            //     std::cout << "player " << list[0]->unum() << "position = " << list[0]->pos() << std::endl;
+
+            //     AngleDeg angle = (target - this->world().self().pos()).th() - this->world().self().body();
+            //     this->doKick(100, angle);
+            // }
         }
     }
-
-    // if (this->world().gameMode().type() == GameMode::PlayOn) {
-    //     if (this->world().self().goalie()) {
-
-
-    //         static const Rect2D our_penalty(Vector2D(-ServerParam::i().pitchHalfLength(),
-    //                                                  -ServerParam::i().penaltyAreaHalfWidth() + 1.0),
-    //                                         Size2D(ServerParam::i().penaltyAreaLength() - 1.0,
-    //                                                ServerParam::i().penaltyAreaWidth() - 2.0));
-
-    //         //////////////////////////////////////////////////////////////
-    //         // catchable
-    //         if (this->world().time().cycle()
-    //             > this->world().self().catchTime().cycle() + ServerParam::i().catchBanCycle()
-    //             && this->world().ball().distFromSelf() < ServerParam::i().catchableArea() - 0.05
-    //             && our_penalty.contains(this->world().ball().pos())) {
-    //             this->doCatch();
-    //         } else if (this->world().self().isKickable()) {
-    //             Bhv_BasicOffensiveKick().execute(this);
-    //         } else {
-    //             Bhv_GoalieBasicMove().execute(this);
-    //         }
-
-    //     } else {
-    //         bool kickable = this->world().self().isKickable();
-    //         if (this->world().existKickableTeammate()
-    //             && this->world().teammatesFromBall().front()->distFromBall()
-    //                < this->world().ball().distFromSelf()) {
-    //             kickable = false;
-    //         }
-
-    //         if (kickable) {
-    //             Bhv_BasicOffensiveKick().execute(this);
-    //         } else {
-    //             Bhv_BasicMove().execute(this);
-    //         }
-    //     }
-    //     return;
-    // }
-
-    // //
-    // // penalty kick mode
-    // //
-    // if (world().gameMode().isPenaltyKickMode()) {
-    //     dlog.addText(Logger::TEAM,
-    //                  __FILE__": penalty kick");
-    //     Bhv_PenaltyKick().execute(this);
-    //     return;
-    // }
-
-    // //
-    // // other set play mode
-    // //
-    // Bhv_SetPlay().execute(this);
 }
 
 /*-------------------------------------------------------------------*/
@@ -441,7 +503,7 @@ SamplePlayer::doPreprocess() {
         std::vector <Vector2D> KickOffPosition(12);
         KickOffPosition[1] = Vector2D(-52, 0);
         KickOffPosition[2] = Vector2D(-30, -10);
-        KickOffPosition[3] = Vector2D(-30, 10);
+        KickOffPosition[3] = Vector2D(-10, 10);
         KickOffPosition[4] = Vector2D(-30, -20);
         KickOffPosition[5] = Vector2D(-30, 20);
         KickOffPosition[6] = Vector2D(-17, 0);
