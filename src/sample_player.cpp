@@ -70,6 +70,7 @@
 #include <rcsc/common/audio_memory.h>
 #include <rcsc/common/say_message_parser.h>
 // #include <rcsc/common/free_message_parser.h>
+#include <rcsc/common/audio_codec.h>
 
 #include <rcsc/param/param_map.h>
 #include <rcsc/param/cmd_line_parser.h>
@@ -217,23 +218,23 @@ SamplePlayer::actionImpl() {
     }
 
     if (this->world().gameMode().type() == GameMode::PlayOn) {
-        std::string message = "TEST";
-        
 
-    //     double speed = 3;
-    //     int goal_marker_id = MarkerID::Goal_R;
-    //     if (this->world().self().side() == SideID::RIGHT) {
-    //         speed = 5;
-    //         goal_marker_id = MarkerID::Goal_L;
-    //     }
+        double speed = 3;
+        int goal_marker_id = MarkerID::Goal_R;
+        if (this->world().self().side() == SideID::RIGHT) {
+            speed = 5;
+            goal_marker_id = MarkerID::Goal_L;
+        }
 
-    //     VisualSensor::MarkerCont markers = this->visualSensor().markers();
-    //     VisualSensor::BallCont balls = this->visualSensor().balls();
-    //     VisualSensor::PlayerCont teammates = this->visualSensor().teammates();
-    //     VisualSensor::PlayerCont opponents = this->visualSensor().opponents();
-    //     VisualSensor::PlayerCont unknown_opponents = this->visualSensor().unknownOpponents();
+        VisualSensor::MarkerCont markers = this->visualSensor().markers();
+        VisualSensor::BallCont balls = this->visualSensor().balls();
+        VisualSensor::PlayerCont teammates = this->visualSensor().teammates();
+        VisualSensor::PlayerCont opponents = this->visualSensor().opponents();
+        VisualSensor::PlayerCont unknown_opponents = this->visualSensor().unknownOpponents();
 
-        if (this->world().self().goalie()) {
+        basicOpponentAvoidPassAction();
+
+        // if (this->world().self().goalie()) {
     //         if (balls.size() != 0) {
     //             VisualSensor::BallT ball = balls[0];
                 
@@ -266,45 +267,62 @@ SamplePlayer::actionImpl() {
     //         } else {
     //             this->doTurn(30);
     //         }
-        } else {
-    //         double goal_direction = 180;
-    //         for (VisualSensor::MarkerT marker : markers) {
-    //             if (marker.id_ == goal_marker_id) {
-    //                 goal_direction = marker.dir_;
-    //             } else if (marker.id_ == MarkerID::Flag_C || marker.id_ == MarkerID::Flag_PLT || marker.id_ == MarkerID::Flag_PLB || marker.id_ == MarkerID::Flag_PLC || marker.id_ == MarkerID::Flag_PRB || marker.id_ == MarkerID::Flag_PRC || marker.id_ == MarkerID::Flag_PRT) {
+        // } else {
+            // this->addSayMessage(new BallPlayerMessage(this->world().ball().pos(), this->world().ball().vel(), this->world().self().unum(), this->world().self().pos(), this->world().self().angleFromSelf()));
 
-    //             } else if (marker.dist_ < 2) {
-    //                 std::cout << "CUSTOM: marker id = " << marker.id_ << std::endl;
-    //                 this->doTurn(90);
-    //                 return;
-    //             }
-    //         }
+            // double ball_dist = this->world().ball().pos().dist(this->world().self().pos());
+            // bool mine = true;
 
-    //         if (balls.size() == 0) {
-    //             this->doTurn(5);
-    //             return;
-    //         }
+            // std::cout << this->world().self().unum() << " CUSTOM: ball position = " << this->world().ball().pos() << "\n";
 
-    //         VisualSensor::BallT ball = balls[0];
-    //         double dir = ball.dir_;
-    //         double dist = ball.dist_;
+            // for (HearMessage message : this->audioSensor().teammateMessages()) {
 
-    //         if (dir > 30 || dir < -30) {
-    //             this->doTurn(10);
-    //             return;
-    //         }
+            //         std::cout << "RECEIVED: unum = " << player_unum << ", x = " << player_pos.x << ", y = " << player_pos.y << ", ball pos = " << ball_pos << "\n";
 
-    //         if (dist < 1) {
-    //             if (opponents.size() > 0 && teammates.size() > 0) {
-    //                 VisualSensor::PlayerT closestTeammate = teammates.front();
-    //                 this->doKick(70, closestTeammate.dir_);
-    //                 return;
-    //             }
-    //             this->doKick(50, goal_direction);
-    //             return;
-    //         }
+            //         if (ball_dist > player_pos.dist(ball_pos)) mine = false;
+            //     }
+            // }
 
-    //         this->doDash(speed*dist + 10, 0);
+            // if (mine) {
+            //     std::cerr << "CUSTOM: " << this->world().self().unum() << ": MY BALL\n";
+
+            //     double goal_direction = 180;
+            //     for (VisualSensor::MarkerT marker : markers) {
+            //         if (marker.id_ == goal_marker_id) {
+            //             goal_direction = marker.dir_;
+            //         } else if (marker.id_ == MarkerID::Flag_C || marker.id_ == MarkerID::Flag_PLT || marker.id_ == MarkerID::Flag_PLB || marker.id_ == MarkerID::Flag_PLC || marker.id_ == MarkerID::Flag_PRB || marker.id_ == MarkerID::Flag_PRC || marker.id_ == MarkerID::Flag_PRT) {
+
+            //         } else if (marker.dist_ < 2) {
+            //             std::cout << "CUSTOM: marker id = " << marker.id_ << std::endl;
+            //             this->doTurn(90);
+            //             return;
+            //         }
+            //     }
+
+            //     if (balls.size() == 0) {
+            //         this->doTurn(5);
+            //         return;
+            //     }
+
+            //     VisualSensor::BallT ball = balls[0];
+            //     double dir = ball.dir_;
+            //     double dist = ball.dist_;
+
+            //     if (dir > 30 || dir < -30) {
+            //         this->doTurn(10);
+            //         return;
+            //     }
+
+            //     if (dist < 1) {
+            //         this->doKick(50, goal_direction);
+            //         return;
+            //     }
+
+            //     this->doDash(speed*dist + 10, 0);
+            // } else {
+            //     std::cout << "CUSTOM: not mine " << this->world().self().unum() << "\n";
+            //     this->doTurn(50);
+            // }
 
             // AngleDeg angle = (this->world().ball().pos() - this->world().self().pos()).th() - this->world().self().body();
             // if (angle.degree() > 10 || angle.degree() < -10) {
@@ -336,7 +354,106 @@ SamplePlayer::actionImpl() {
             //     AngleDeg angle = (target - this->world().self().pos()).th() - this->world().self().body();
             //     this->doKick(100, angle);
             // }
+        // }
+    }
+}
+
+void SamplePlayer::sendMessages() {
+    this->addSayMessage(new BallPlayerMessage(this->world().ball().pos(), this->world().ball().vel(), this->world().self().unum(), this->world().self().pos(), this->world().self().angleFromSelf()));
+}
+
+Vector2D* SamplePlayer::parseBallPlayerMessage(const char* msg) {
+    if (*msg == rcsc::BallPlayerMessageParser::sheader()) {
+        if ( (int)std::strlen( msg ) < rcsc::BallPlayerMessageParser::slength()){
+            std::cerr << "OnePlayerMessageParser::parse()"
+                    << " Illegal message ["
+                    << msg << "] len = " << std::strlen( msg )
+                    << std::endl;
         }
+        msg++;
+
+        Vector2D ball_pos;
+        Vector2D ball_vel;
+
+        if ( ! AudioCodec::i().decodeStr5ToPosVel( std::string( msg, 5 ),
+                                                &ball_pos, &ball_vel ) )
+        {
+            std::cerr << "***ERROR*** BallPlayerMessageParser::parse()"
+                    << " Failed to decode ball [" << msg << "]"
+                    << std::endl;
+            dlog.addText( Logger::SENSOR,
+                        "BallPlayerMessageParser: Failed to decode Ball Info [%s]",
+                        msg );
+        }
+        msg += 5;
+
+        boost::int64_t ival = 0;
+        if ( ! AudioCodec::i().decodeStrToInt64( std::string( msg, 4 ),
+                                                &ival ) )
+        {
+            std::cerr << "BallPlayerMessageParser::parse()"
+                    << " Failed to parse [" << msg << "]"
+                    << std::endl;
+            dlog.addText( Logger::SENSOR,
+                        "BallPlayerMessageParser: Failed to decode Player Info [%s]",
+                        msg );
+        }
+
+        int player_unum = Unum_Unknown;
+        Vector2D player_pos;
+        AngleDeg player_body;
+
+        // 180=360/2
+        player_body = static_cast< double >( ( ival % 180 ) * 2 - 180 );
+        ival /= 180;
+
+        // 69 > 68/1.0
+        player_pos.y = ( ival % 69 ) * 1.0 - 34.0;
+        ival /= 69;
+
+        // 106 > 105/1.0
+        player_pos.x = ( ival % 106 ) * 1.0 - 52.5;
+        ival /= 106;
+
+        player_unum = ( ival % 22 ) + 1;
+        // ival /= 22
+
+        Vector2D ans[] = {player_pos, ball_pos};
+        return ans;
+    }
+}
+
+bool SamplePlayer::isMine(double dist) {
+    bool mine = true;
+
+    for (HearMessage message : this->audioSensor().teammateMessages()) {
+        Vector2D* pos = parseBallPlayerMessage(message.str_.c_str());
+        std::cout << "CUSTOM: received " << *pos << " and " << *(pos+1) << std::endl;
+    }
+
+    return mine;
+}
+
+void SamplePlayer::basicOpponentAvoidPassAction() {
+    VisualSensor::BallCont balls = this->visualSensor().balls();
+    VisualSensor::PlayerCont teammates = this->visualSensor().teammates();
+    VisualSensor::PlayerCont opponents = this->visualSensor().opponents();
+
+    if (balls.size() == 0) {
+        this->doTurn(10);
+        return;
+    }
+
+    bool mine = isMine(100);
+
+    if (!this->world().self().goalie()) {
+        if (balls[0].dist_ <= 1) {
+            // kick
+        } else {
+            
+        }
+    } else {
+
     }
 }
 

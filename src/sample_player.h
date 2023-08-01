@@ -73,6 +73,11 @@ protected:
     void handlePlayerParam();
     virtual
     void handlePlayerType();
+    virtual void basicOpponentAvoidPassAction();
+    virtual rcsc::Vector2D* parseBallPlayerMessage(const char *message);
+    virtual void sendMessages();
+
+    virtual bool isMine(double);
 
 private:
 
